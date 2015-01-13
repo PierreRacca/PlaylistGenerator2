@@ -1,0 +1,5 @@
+*Trouver un module python permettant de lire les meta-dt contenues dans un fichier mp3. (eyeD3 par exemple). Comprendre et tester son fonctionnement.
+
+*Comprendre le fonctionnement des modules NumPy et SciPy. Implémenter une classe contenant la matrice des scores.
+
+*Trouver comment éditer une playlist que peut lire vlc. Voir dans le module vlc.py
