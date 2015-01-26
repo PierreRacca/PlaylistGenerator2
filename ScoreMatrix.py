@@ -12,6 +12,8 @@ class ScoreMatrix:
 	def __init__(self):
 		rd.seed()#on initialise le generateur de nombre aleatoire a la creation de la matrice
 		self.load_file()#charge la matrice des scores self.score_matrix
+		self.decimal_choice=5#choix du nombre de decimal de l'arrondi
+		self.is_normalized=False
 
 	def load_file(self):
 		self.file_name="Test_ScoreMatrix.txt" #Nom du fichier ou est sauvegardee la matrice des scores
@@ -31,13 +33,15 @@ class ScoreMatrix:
 			print("File not found : ",e)
 
 	def normalize_matrix(self):#normalise la matrice en arrondissant les valeurs
-		decimal_choice=5#choix du nombre de decimal de l'arrondi
-		self.score_matrix=np.around(self.score_matrix/np.sum(self.score_matrix,axis=0),decimals=decimal_choice)
+		self.score_matrix=np.around(self.score_matrix/np.sum(self.score_matrix,axis=0),decimals=self.decimal_choice)
+		self.is_normalized=True
 
-	def select_score(self,column):																					
-		N=rd.randint(1,100000)/100000 #tire un nombre decimal au hasard entre 0,000001 et 1
-		print(N)
+	def select_score(self,column):
+		if (self.is_normalized==False):
+			self.normalize_matrix()																					
+		N=rd.randint(1,pow(10,self.decimal_choice))/pow(10,self.decimal_choice) #tire un nombre decimal au hasard entre 0,000001 et 1
 		candidates=np.sort(self.score_matrix[:,column])
+		print(N)
 		candidates[:]=candidates[::-1]
 		sum_prob=0
 		select_score=0
@@ -47,5 +51,7 @@ class ScoreMatrix:
 				break
 			else:
 				sum_prob+=score
+		print(select_score)
 		item=np.where(self.score_matrix[:,column]==select_score)#renvoie une sequence avec les lignes ou l'on trouve la valeur select_score
 		item=rd.choice(item[0])#prend une ligne au hasard parmi celles ci-dessus
+		return(item)
