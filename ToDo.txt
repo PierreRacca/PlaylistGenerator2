@@ -1,5 +1,16 @@
-*Trouver un module python permettant de lire les meta-dt contenues dans un fichier mp3. (eyeD3 par exemple). Comprendre et tester son fonctionnement.
+URGENT :
 
-*Comprendre le fonctionnement des modules NumPy et SciPy. Implémenter une classe contenant la matrice des scores.
+*Trouver un module python permettant de lire les meta-data contenues dans un fichier mp3. (eyeD3 par exemple). Comprendre et tester son fonctionnement. (Racca)
 
-*Trouver comment éditer une playlist que peut lire vlc. Voir dans le module vlc.py
+*Initialiser la matrice des scores à partir des meta-data (Racca)
+
+*Mettre à jour la matrice des scores (Marie et Mel)
+
+*Comprendre le fonctionnement des modules NumPy et SciPy. Implémenter une classe contenant la matrice des scores. (Fait en partie)
+
+Après :
+*Assurer la continuité de la playlist
+
+*Coordonner les différents modules
+
+
