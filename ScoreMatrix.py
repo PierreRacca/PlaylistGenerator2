@@ -17,7 +17,7 @@ class ScoreMatrix:
 
 	def load_file(self):
 		self.file_name="Test_ScoreMatrix.txt" #Nom du fichier ou est sauvegardee la matrice des scores
-		curr_dir=os.getcwd()
+		curr_dir=os.getcwd() #donne le dossier courant
 		try:
 			found_file=False #on verifie que le fichier est bien present dans le dossier courrant
 			for path in os.walk(curr_dir,topdown=False):
@@ -36,9 +36,9 @@ class ScoreMatrix:
 		self.score_matrix=np.around(self.score_matrix/np.sum(self.score_matrix,axis=0),decimals=self.decimal_choice)
 		self.is_normalized=True
 
-	def select_score(self,column):
+	def select_score(self,column): #renvoie la ligne i tq ligne correspond au score
 		if (self.is_normalized==False):
-			self.normalize_matrix()																					
+			self.normalize_matrix()
 		N=rd.randint(1,pow(10,self.decimal_choice))/pow(10,self.decimal_choice) #tire un nombre decimal au hasard entre 0,000001 et 1
 		candidates=np.sort(self.score_matrix[:,column])
 		print(N)
@@ -55,3 +55,25 @@ class ScoreMatrix:
 		item=np.where(self.score_matrix[:,column]==select_score)#renvoie une sequence avec les lignes ou l'on trouve la valeur select_score
 		item=rd.choice(item[0])#prend une ligne au hasard parmi celles ci-dessus
 		return(item)
+
+    def attribute_score(self, taux, column): #taux d'ecoute a recuperer d'un autre fichier
+        ligne = select_score(self, column)
+        score_chanson_ecoutee = self.score_matrix[ligne, column]
+        if taux > 0.1 and taux < 0.5 :
+            score_chanson_ecoutee+ = (1/0.4)*taux - 0.25
+        elif taux > 0.5:
+            score_chanson_ecoutee+= 1
+
+
+
+
+
+
+
+
+#numpy.savetxt("nom_fichier.txt",M)
+
+
+
+
+
