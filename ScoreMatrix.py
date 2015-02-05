@@ -56,24 +56,32 @@ class ScoreMatrix:
 		item=rd.choice(item[0])#prend une ligne au hasard parmi celles ci-dessus
 		return(item)
 
-    def attribute_score(self, taux, column): #taux d'ecoute a recuperer d'un autre fichier
-        ligne = select_score(self, column)
-        score_chanson_ecoutee = self.score_matrix[ligne, column]
+    def update_score(self, taux, listened_music, previous_music): #taux d'ecoute a recuperer d'un autre fichier
+    ## Modification du score de la chanson ecoutee par rapport a la chanson ecoutee avant
         if taux > 0.1 and taux < 0.5 :
-            score_chanson_ecoutee+ = (1/0.4)*taux - 0.25
+            self.score_matrix[listened_music, previous_music] += (1/0.4)*taux - 0.25
         elif taux > 0.5:
-            score_chanson_ecoutee+= 1
+            self.score_matrix[listened_music, previous_music] += 1
+
+    ## Normalisation des scores en raport avec la chanson ecoutee precedemment
+        self.normalize_matrix()
+
+    ## Sauvegarde de la matrice actualisee
+        numpy.savetxt("Test_ScoreMatrix.txt",self.score_matrix)
 
 
-
-
-
-
-
-
-#numpy.savetxt("nom_fichier.txt",M)
-
-
+	def test (self) :
+		self.initialize_matrix()
+		##Theorie : music_analysis(music_library)
+		##Theorie : music= rand(music_library)
+		new_music=self.select_score(music)
+		taux=0
+		while not getkey():
+			ecoute_chanson(new_music)
+			taux = recupere_taux (new_music)
+			self.attribute_score(taux,new_music, music)
+			music = new_music
+			new_music=self.select_score(music)
 
 
 
