@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import random as rd
+import FindMusicFiles as FMF
 
 class ErrorFile(Exception):
 	def __init__(self, file_name):
@@ -8,29 +9,53 @@ class ErrorFile(Exception):
 	def __str__(self):
 		return repr(self.file_name)
 
+class ErrorMatrix(Exception):
+	def __init__(self,value):
+		self.value=value
+	def __str__(self):
+		return repr(self.value)
+
 class ScoreMatrix:
 	def __init__(self):
 		rd.seed()#on initialise le generateur de nombre aleatoire a la creation de la matrice
-		self.load_file()#charge la matrice des scores self.score_matrix
+		try:
+			self.init_matrix()#initialise la matrice des scores
+		except ErrorMatrix as e:
+			print("Unable to initiate the score matrix. Current value is : ",e)
 		self.decimal_choice=5#choix du nombre de decimal de l'arrondi
 		self.is_normalized=False
+
+	def init_matrix(self):
+		self.score_matrix=None
+		#initialise la matrice avec un fichier existant
+		try:
+			self.score_matrix=self.load_file()
+		#initialise directement la matrice
+		except ErrorFile as e:
+			print("File not found  creating a new one")
+			D=FMF.DocumentSearch()
+			matrix_size=D.get_size()
+			self.score_matrix=np.array([matrix_size,matrix_size])
+			self.score_matrix.fill(1)
+			np.savetxt(self.file_name,self.score_matrix)
+		if self.score_matrix==None:
+			raise ErrorMatrix(self.score_matrix)
+
 
 	def load_file(self):
 		self.file_name="Test_ScoreMatrix.txt" #Nom du fichier ou est sauvegardee la matrice des scores
 		curr_dir=os.getcwd() #donne le dossier courant
-		try:
-			found_file=False #on verifie que le fichier est bien present dans le dossier courrant
-			for path in os.walk(curr_dir,topdown=False):
-				if self.file_name in path[2]:
-					self.file_name=os.path.join(path[0],self.file_name)
-					found_file=True
-					break
-			if(found_file==False):
-				raise ErrorFile(self.file_name)
-			else:
-				self.score_matrix=np.genfromtxt(self.file_name,delimiter=',')
-		except ErrorFile as e:
-			print("File not found : ",e)
+		found_file=False #on verifie que le fichier est bien present dans le dossier courrant
+		for path in os.walk(curr_dir,topdown=False):
+			if self.file_name in path[2]:
+				self.file_name=os.path.join(path[0],self.file_name)
+				found_file=True
+				break
+		if(found_file==False):
+			raise ErrorFile(self.file_name)
+		else:
+			score_matrix=np.genfromtxt(self.file_name,delimiter=',')
+			return(score_matrix)
 
 	def normalize_matrix(self):#normalise la matrice en arrondissant les valeurs
 		self.score_matrix=np.around(self.score_matrix/np.sum(self.score_matrix,axis=0),decimals=self.decimal_choice)
@@ -39,7 +64,7 @@ class ScoreMatrix:
 	def select_score(self,column): #renvoie la ligne i tq ligne correspond au score
 		if (self.is_normalized==False):
 			self.normalize_matrix()
-		N=rd.randint(1,pow(10,self.decimal_choice))/pow(10,self.decimal_choice) #tire un nombre decimal au hasard entre 0,000001 et 1
+		N=rd.randint(1,pow(10,self.decimal_choice))/pow(10,self.decimal_choice) #tire un nombre decimal au hasard
 		candidates=np.sort(self.score_matrix[:,column])
 		print(N)
 		candidates[:]=candidates[::-1]
@@ -56,19 +81,18 @@ class ScoreMatrix:
 		item=rd.choice(item[0])#prend une ligne au hasard parmi celles ci-dessus
 		return(item)
 
-    def update_score(self, taux, listened_music, previous_music): #taux d'ecoute a recuperer d'un autre fichier
-    ## Modification du score de la chanson ecoutee par rapport a la chanson ecoutee avant
-        if taux > 0.1 and taux < 0.5 :
-            self.score_matrix[listened_music, previous_music] += (1/0.4)*taux - 0.25
-        elif taux > 0.5:
-            self.score_matrix[listened_music, previous_music] += 1
+	def update_score(self, taux, listened_music, previous_music): 
+		## Modification du score de la chanson ecoutee par rapport a la chanson ecoutee avant
+	    if taux > 0.1 and taux < 0.5 :
+	        self.score_matrix[listened_music, previous_music] += (1/0.4)*taux - 0.25
+	    elif taux > 0.5:
+	        self.score_matrix[listened_music, previous_music] += 1
+	    self.is_normalized=False
+		## Sauvegarde de la matrice actualisee
+	    self.save_score_matrix()
 
-    ## Normalisation des scores en raport avec la chanson ecoutee precedemment
-        self.normalize_matrix()
-
-    ## Sauvegarde de la matrice actualisee
-        numpy.savetxt("Test_ScoreMatrix.txt",self.score_matrix)
-
+	def save_score_matrix(self):
+	    np.savetxt(self.file_name,self.score_matrix)
 
 	def test (self) :
 		self.initialize_matrix()
@@ -82,6 +106,3 @@ class ScoreMatrix:
 			self.attribute_score(taux,new_music, music)
 			music = new_music
 			new_music=self.select_score(music)
-
-
-
