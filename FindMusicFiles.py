@@ -40,13 +40,25 @@ class DocumentSearch:
     for root, dirs, files in os.walk(self.pathname, topdown=False):
       for name in files:
         if '.' in name:#si le fichier possede une extension
-          name_extension=name.split('.')
+          name_extension=name
+          name_extension=name_extension.split('.')
           if name_extension[len(name_extension)-1] in self.extension:#si le fichier a une extension correspondant à un fichier audio
+            new_name=name
+            #on renomme le fichier si besoin
+            if ' ' in new_name:
+              new_name=new_name.replace(' ','_')
+            elif new_name[0]=='.':
+              new_name=new_name[1:]
+            elif new_name[0]=='_':
+              new_name=new_name[1:]
+
+            full_new_name=os.path.join(root,new_name)
             full_name=os.path.join(root,name)
+            os.rename(full_name,full_new_name)
             hash_code=hashlib.md5(name.encode('utf-8')).digest()
             if hash_code not in self.hash_list:
               self.hash_list+=[hash_code]#on store le nom du fichier et son encodage
-              size=os.path.getsize(full_name)#donne la taille du fichier
+              size=os.path.getsize(full_new_name)#donne la taille du fichier
               self.total_size+=size
               self.files_list+=[(name,size)]
 

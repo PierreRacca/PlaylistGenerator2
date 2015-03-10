@@ -35,15 +35,15 @@ class ScoreMatrix:
 			print("File not found  creating a new one")
 			D=FMF.DocumentSearch()
 			matrix_size=D.get_size()
-			self.score_matrix=np.array([matrix_size,matrix_size])
-			self.score_matrix.fill(1)
-			np.savetxt(self.file_name,self.score_matrix)
+			print(matrix_size)
+			self.score_matrix=np.ones((matrix_size,matrix_size))
+			self.save_score_matrix()
 		if self.score_matrix==None:
 			raise ErrorMatrix(self.score_matrix)
 
 
 	def load_file(self):
-		self.file_name="Test_ScoreMatrix.txt" #Nom du fichier ou est sauvegardee la matrice des scores
+		self.file_name="ScoreMatrix.txt" #Nom du fichier ou est sauvegardee la matrice des scores
 		curr_dir=os.getcwd() #donne le dossier courant
 		found_file=False #on verifie que le fichier est bien present dans le dossier courrant
 		for path in os.walk(curr_dir,topdown=False):
@@ -58,15 +58,16 @@ class ScoreMatrix:
 			return(score_matrix)
 
 	def normalize_matrix(self):#normalise la matrice en arrondissant les valeurs
+		np.fill_diagonal(self.score_matrix,0)
 		self.score_matrix=np.around(self.score_matrix/np.sum(self.score_matrix,axis=0),decimals=self.decimal_choice)
 		self.is_normalized=True
 
 	def select_score(self,column): #renvoie la ligne i tq ligne correspond au score
+		print("Column: ",column)
 		if (self.is_normalized==False):
 			self.normalize_matrix()
 		N=rd.randint(1,pow(10,self.decimal_choice))/pow(10,self.decimal_choice) #tire un nombre decimal au hasard
 		candidates=np.sort(self.score_matrix[:,column])
-		print(N)
 		candidates[:]=candidates[::-1]
 		sum_prob=0
 		select_score=0
@@ -76,33 +77,22 @@ class ScoreMatrix:
 				break
 			else:
 				sum_prob+=score
-		print(select_score)
 		item=np.where(self.score_matrix[:,column]==select_score)#renvoie une sequence avec les lignes ou l'on trouve la valeur select_score
 		item=rd.choice(item[0])#prend une ligne au hasard parmi celles ci-dessus
+		print("Item :",item)
 		return(item)
 
 	def update_score(self, taux, listened_music, previous_music): 
-		## Modification du score de la chanson ecoutee par rapport a la chanson ecoutee avant
-	    if taux > 0.1 and taux < 0.5 :
-	        self.score_matrix[listened_music, previous_music] += (1/0.4)*taux - 0.25
-	    elif taux > 0.5:
-	        self.score_matrix[listened_music, previous_music] += 1
-	    self.is_normalized=False
-		## Sauvegarde de la matrice actualisee
-	    self.save_score_matrix()
+	   ## Modification du score de la chanson ecoutee par rapport a la chanson ecoutee avant
+	   print("Previous score : ",self.score_matrix[listened_music, previous_music])
+	   if(taux>0.1 and taux<0.5):
+	    	self.score_matrix[listened_music, previous_music] += (1/0.4)*taux - 0.25
+	   elif taux>0.5:
+	    	self.score_matrix[listened_music, previous_music] += 1
+	   self.is_normalized=False
+	   print("Updated score : ",self.score_matrix[listened_music, previous_music])
+	   # Sauvegarde de la matrice actualisee
+	   self.save_score_matrix()
 
 	def save_score_matrix(self):
-	    np.savetxt(self.file_name,self.score_matrix)
-
-	def test (self) :
-		self.initialize_matrix()
-		##Theorie : music_analysis(music_library)
-		##Theorie : music= rand(music_library)
-		new_music=self.select_score(music)
-		taux=0
-		while not getkey():
-			ecoute_chanson(new_music)
-			taux = recupere_taux (new_music)
-			self.attribute_score(taux,new_music, music)
-			music = new_music
-			new_music=self.select_score(music)
+		np.savetxt(self.file_name,self.score_matrix,fmt='%5e',delimiter=',')

@@ -111,9 +111,9 @@ class Player(QtGui.QMainWindow):
     def PlayPause(self):
         """Toggle play/pause status
         """
+        self.stop_will=False
         if self.mediaplayer.is_playing():
             self.mediaplayer.pause()
-            print(vlc.libvlc_media_player_get_time(self.mediaplayer))
             self.playbutton.setText("Play")
             self.playbutton.setIcon(QtGui.QIcon(icon_dir+"media-playback-start.png"))
             self.isPaused = True
@@ -131,6 +131,7 @@ class Player(QtGui.QMainWindow):
         """Stop player
         """
         self.mediaplayer.stop()
+        self.stop_will=True
         self.playbutton.setText("Play")
         self.playbutton.setIcon(QtGui.QIcon(icon_dir+"media-playback-start.png"))
         self.score_matrix.save_score_matrix()
@@ -138,7 +139,7 @@ class Player(QtGui.QMainWindow):
     def Next(self):
         """Select the next song
         """
-
+        self.stop_will=False
         #une chanson a deja ete ecoutee
         if self.previous_song_index!=-1:
             self.previous_song_index=self.listened_song_index
@@ -151,7 +152,8 @@ class Player(QtGui.QMainWindow):
             #actualisation du score de la matrix
             self.score_matrix.update_score(time_rate,self.listened_song_index,self.previous_song_index)
             #selectionne la musique suivante
-            next_music=self.songs_list[self.score_matrix.select_score(self.listened_song_index)]
+            self.listened_song_index=self.score_matrix.select_score(self.listened_song_index)
+            next_music=self.songs_list[self.listened_song_index]
             #lance la lecture de la musique suivante
             self.OpenFile(next_music)
             
@@ -205,7 +207,11 @@ class Player(QtGui.QMainWindow):
                 # after the song finished, the play button stills shows
                 # "Pause", not the desired behavior of a media player
                 # this will fix it
-                self.Stop()
+                if self.stop_will:
+                    self.Stop()
+                else:
+                    self.Next()
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
